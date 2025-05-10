@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Darktide Mission Notifier</title>
+    <script src="popup.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="main">
+      <label for="query">Search for text:</label>
+      <input
+        type="text"
+        id="query"
+        placeholder="Search for text"
+        autocomplete="off"
+        required
+      />
+      <label for="interval">Interval:</label>
+      <input
+        type="number"
+        id="interval"
+        placeholder="Update frequency in seconds"
+        autocomplete="off"
+        required
+      />
+      <p id="error">Both fields are required</p>
+      <p id="status">Running</p>
+      <button id="button">Start</button>
+    </div>
+    <div id="unavailable">
+      <p>
+        This extension is only available at
+        <a href="https://darktide.gameslantern.com/mission-board"
+          >Live Mission Board Tracker</a
+        >
+      </p>
+      <p>Go to the website and reopen this popup from there.</p>
+    </div>
+  </body>
+</html>
