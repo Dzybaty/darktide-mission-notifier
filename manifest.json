@@ -3,7 +3,7 @@
   "name": "Darktide Mission Notifier",
   "version": "1.0",
   "description": "Notifies when specified mission is avaliable",
-  "permissions": ["storage", "activeTab", "scripting", "notifications"],
+  "permissions": ["storage", "activeTab", "scripting", "offscreen", "notifications"],
   "host_permissions": ["https://darktide.gameslantern.com/mission-board"],
   "action": {
     "default_popup": "popup.html",

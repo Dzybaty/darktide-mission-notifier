@@ -1,5 +1,22 @@
 let isRunning = false;
 
+const handleNotifications = async () => {
+  await chrome.offscreen.createDocument({
+    url: "audio.html",
+    reasons: [chrome.offscreen.Reason.AUDIO_PLAYBACK],
+    justification: "notification",
+  });
+
+  setTimeout(() => chrome.offscreen.closeDocument(), 2000);
+
+  chrome.notifications.create({
+    type: "basic",
+    iconUrl: "icon.png",
+    title: "Darktide Mission Notifier",
+    message: "Found a mission for you!",
+  });
+};
+
 const sendContentMessage = async (message) => {
   const [tab] = await chrome.tabs.query({
     active: true,
@@ -9,7 +26,7 @@ const sendContentMessage = async (message) => {
   return chrome.tabs.sendMessage(tab.id, message);
 };
 
-const setStorage = async (key, value) => {
+const setStorage = (key, value) => {
   chrome.storage.local.set({ [key]: value });
 };
 
@@ -55,16 +72,6 @@ chrome.runtime.onMessage.addListener(async (req) => {
     isRunning = false;
     setStorage("isRunning", false);
     chrome.action.setIcon({ path: "icon.png" });
-
-    chrome.notifications.create({
-      type: "basic",
-      iconUrl: "icon.png",
-      title: "Darktide Mission Notifier",
-      message: "Found a mission for you!",
-    });
-
-    chrome.tabs.create({
-      url: "https://cdn.freesound.org/previews/56/56164_37876-lq.mp3",
-    });
+    await handleNotifications();
   }
 });
