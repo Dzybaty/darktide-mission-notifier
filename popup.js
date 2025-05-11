@@ -1,19 +1,21 @@
 const checkTab = () => {
   const URL = "https://darktide.gameslantern.com/mission-board";
 
-  chrome.tabs.query(
-    {
-      active: true,
-      lastFocusedWindow: true,
-    },
-    (tabs) => {
-      if (tabs[0].url !== URL) {
-        chrome.tabs.create({
-          url: URL,
-        });
+  chrome.tabs.query({}, (tabs) => {
+    const tab = tabs?.find((el) => el.url === URL);
+
+    if (tab) {
+      if (tab.active) {
+        return;
       }
+
+      chrome.tabs.update(tab.id, { active: true });
+
+      return;
     }
-  );
+
+    chrome.tabs.create({ url: URL });
+  });
 };
 
 const updateButton = (button, isRunning) => {
@@ -33,8 +35,8 @@ const toggleShowElement = (element, isShown) => {
   element.style.display = "none";
 };
 
-const validate = (query, interval, error) => {
-  if (!query.value || !interval.value) {
+const validate = (query, error) => {
+  if (!query.value) {
     toggleShowElement(error, true);
 
     return false;
@@ -50,29 +52,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   const error = document.getElementById("error");
   const status = document.getElementById("status");
   const query = document.getElementById("query");
-  const interval = document.getElementById("interval");
   const button = document.getElementById("button");
 
-  const {
-    isRunning,
-    query: queryValue,
-    interval: intervalValue,
-  } = await chrome.storage.local.get();
+  const { isRunning, query: queryValue } = await chrome.storage.local.get();
 
   updateButton(button, isRunning);
   updateField(query, queryValue);
-  updateField(interval, intervalValue);
   toggleShowElement(status, isRunning);
 
   const handleClick = async () => {
-    if (!isRunning && !validate(query, interval, error)) {
+    if (!isRunning && !validate(query, error)) {
       return;
     }
 
     await chrome.runtime.sendMessage({
       action: "click",
       query: query.value,
-      interval: interval.value,
     });
   };
 
@@ -86,10 +81,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (changes.query) {
       updateField(query, changes.query.newValue);
-    }
-
-    if (changes.interval) {
-      updateField(interval, changes.interval.newValue);
     }
   });
 });

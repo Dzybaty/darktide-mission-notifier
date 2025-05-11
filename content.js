@@ -6,7 +6,6 @@ const handleFound = async () => {
 
 const checkMissionBoard = (query, interval) => {
   let found = false;
-  console.log(interval);
 
   const container = document.querySelector("div#darktide-mission-board")
     .children[1];

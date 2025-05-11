@@ -1,3 +1,4 @@
+const UPDATE_INTERVAL = 60000;
 let isRunning = false;
 
 const handleNotifications = async () => {
@@ -34,7 +35,6 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.clear();
   setStorage("isRunning", false);
   setStorage("query", "");
-  setStorage("interval", "");
 });
 
 chrome.runtime.onMessage.addListener(async (req) => {
@@ -43,14 +43,13 @@ chrome.runtime.onMessage.addListener(async (req) => {
       const res = await sendContentMessage({
         action: "start",
         query: req.query,
-        interval: req.interval,
+        interval: UPDATE_INTERVAL,
       });
 
       if (res.success) {
         isRunning = true;
         setStorage("isRunning", true);
         setStorage("query", req.query);
-        setStorage("interval", req.interval);
         chrome.action.setIcon({ path: "icon_active.png" });
       }
 
