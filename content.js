@@ -10,7 +10,7 @@ const checkMissionBoard = (query, interval) => {
   const container = document.querySelector("div#darktide-mission-board")
     .children[1];
 
-  for (let mission of container.children) {
+  for (const mission of container.children) {
     if (mission.innerHTML.toLowerCase().includes(query.toLowerCase())) {
       found = true;
       mission.style.border = "2px solid red";

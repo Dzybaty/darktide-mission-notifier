@@ -1,21 +1,27 @@
 const UPDATE_INTERVAL = 60000;
 let isRunning = false;
+let notificationChrome = true;
+let notificationSound = true;
 
 const handleNotifications = async () => {
-  await chrome.offscreen.createDocument({
-    url: "audio.html",
-    reasons: [chrome.offscreen.Reason.AUDIO_PLAYBACK],
-    justification: "notification",
-  });
+  if (notificationSound) {
+    await chrome.offscreen.createDocument({
+      url: "audio.html",
+      reasons: [chrome.offscreen.Reason.AUDIO_PLAYBACK],
+      justification: "notification",
+    });
 
-  setTimeout(() => chrome.offscreen.closeDocument(), 2000);
+    setTimeout(() => chrome.offscreen.closeDocument(), 2000);
+  }
 
-  chrome.notifications.create({
-    type: "basic",
-    iconUrl: "icon.png",
-    title: "Darktide Mission Notifier",
-    message: "Found a mission for you!",
-  });
+  if (notificationChrome) {
+    chrome.notifications.create({
+      type: "basic",
+      iconUrl: "icon.png",
+      title: "Darktide Mission Notifier",
+      message: "Found a mission for you!",
+    });
+  }
 };
 
 const sendContentMessage = async (message) => {
@@ -27,14 +33,20 @@ const sendContentMessage = async (message) => {
   return chrome.tabs.sendMessage(tab.id, message);
 };
 
-const setStorage = (key, value) => {
-  chrome.storage.local.set({ [key]: value });
+const setStorage = (values) => {
+  for (const [key, value] of Object.entries(values)) {
+    chrome.storage.local.set({ [key]: value });
+  }
 };
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.clear();
-  setStorage("isRunning", false);
-  setStorage("query", "");
+  setStorage({
+    isRunning: false,
+    notificationChrome: true,
+    notificationSound: true,
+    query: "",
+  });
 });
 
 chrome.runtime.onMessage.addListener(async (req) => {
@@ -48,8 +60,16 @@ chrome.runtime.onMessage.addListener(async (req) => {
 
       if (res.success) {
         isRunning = true;
-        setStorage("isRunning", true);
-        setStorage("query", req.query);
+        notificationChrome = req.notificationChrome;
+        notificationSound = req.notificationSound;
+
+        setStorage({
+          isRunning: true,
+          query: req.query,
+          notificationChrome: req.notificationChrome,
+          notificationSound: req.notificationSound,
+        });
+
         chrome.action.setIcon({ path: "icon_active.png" });
       }
 
@@ -62,14 +82,14 @@ chrome.runtime.onMessage.addListener(async (req) => {
 
     if (res.success) {
       isRunning = false;
-      setStorage("isRunning", false);
+      setStorage({ isRunning: false });
       chrome.action.setIcon({ path: "icon.png" });
     }
   }
 
   if (req.action === "found") {
     isRunning = false;
-    setStorage("isRunning", false);
+    setStorage({ isRunning: false });
     chrome.action.setIcon({ path: "icon.png" });
     await handleNotifications();
   }
