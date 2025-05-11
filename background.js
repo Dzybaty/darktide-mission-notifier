@@ -1,10 +1,23 @@
 const UPDATE_INTERVAL = 60000;
-let isRunning = false;
-let notificationChrome = true;
-let notificationSound = true;
+const ICON = "icon.png";
+const ICON_ACTIVE = "icon_active.png";
+
+const state = {
+  isRunning: false,
+  notificationChrome: true,
+  notificationSound: true,
+  query: "",
+};
+
+const setState = (values) => {
+  for (const [key, value] of Object.entries(values)) {
+    state[key] = value;
+    chrome.storage.local.set({ [key]: value });
+  }
+};
 
 const handleNotifications = async () => {
-  if (notificationSound) {
+  if (state.notificationSound) {
     await chrome.offscreen.createDocument({
       url: "audio.html",
       reasons: [chrome.offscreen.Reason.AUDIO_PLAYBACK],
@@ -14,7 +27,7 @@ const handleNotifications = async () => {
     setTimeout(() => chrome.offscreen.closeDocument(), 2000);
   }
 
-  if (notificationChrome) {
+  if (state.notificationChrome) {
     chrome.notifications.create({
       type: "basic",
       iconUrl: "icon.png",
@@ -33,15 +46,13 @@ const sendContentMessage = async (message) => {
   return chrome.tabs.sendMessage(tab.id, message);
 };
 
-const setStorage = (values) => {
-  for (const [key, value] of Object.entries(values)) {
-    chrome.storage.local.set({ [key]: value });
-  }
+const setIcon = (icon) => {
+  chrome.action.setIcon({ path: icon });
 };
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.clear();
-  setStorage({
+  setState({
     isRunning: false,
     notificationChrome: true,
     notificationSound: true,
@@ -51,7 +62,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.runtime.onMessage.addListener(async (req) => {
   if (req.action === "click") {
-    if (!isRunning) {
+    if (!state.isRunning) {
       const res = await sendContentMessage({
         action: "start",
         query: req.query,
@@ -59,18 +70,14 @@ chrome.runtime.onMessage.addListener(async (req) => {
       });
 
       if (res.success) {
-        isRunning = true;
-        notificationChrome = req.notificationChrome;
-        notificationSound = req.notificationSound;
-
-        setStorage({
+        setState({
           isRunning: true,
           query: req.query,
           notificationChrome: req.notificationChrome,
           notificationSound: req.notificationSound,
         });
 
-        chrome.action.setIcon({ path: "icon_active.png" });
+        setIcon(ICON_ACTIVE);
       }
 
       return;
@@ -81,16 +88,14 @@ chrome.runtime.onMessage.addListener(async (req) => {
     });
 
     if (res.success) {
-      isRunning = false;
-      setStorage({ isRunning: false });
-      chrome.action.setIcon({ path: "icon.png" });
+      setState({ isRunning: false });
+      setIcon(ICON);
     }
   }
 
   if (req.action === "found") {
-    isRunning = false;
-    setStorage({ isRunning: false });
-    chrome.action.setIcon({ path: "icon.png" });
+    setState({ isRunning: false });
+    setIcon(ICON);
     await handleNotifications();
   }
 });
