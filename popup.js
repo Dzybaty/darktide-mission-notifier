@@ -74,7 +74,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateField(notificationChrome, "checked", notificationChromeValue);
   updateField(notificationSoundValue, "checked", notificationSoundValue);
   toggleShowMessage(status, isRunning);
-  toggleDisableElements([notificationChrome, notificationSound], isRunning);
+  toggleDisableElements(
+    [notificationChrome, notificationSound, query],
+    isRunning
+  );
 
   const handleClick = async () => {
     if (!isRunning && !validate(query, error)) {
@@ -96,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateButton(button, changes.isRunning.newValue);
       toggleShowMessage(status, changes.isRunning.newValue);
       toggleDisableElements(
-        [notificationChrome, notificationSound],
+        [notificationChrome, notificationSound, query],
         changes.isRunning.newValue
       );
     }
