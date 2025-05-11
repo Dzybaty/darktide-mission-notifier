@@ -1,6 +1,5 @@
 const checkTab = () => {
-  const main = document.getElementById("main");
-  const unavailable = document.getElementById("unavailable");
+  const URL = "https://darktide.gameslantern.com/mission-board";
 
   chrome.tabs.query(
     {
@@ -8,12 +7,11 @@ const checkTab = () => {
       lastFocusedWindow: true,
     },
     (tabs) => {
-      if (tabs[0].url === "https://darktide.gameslantern.com/mission-board") {
-        unavailable.style.display = "none";
-        return;
+      if (tabs[0].url !== URL) {
+        chrome.tabs.create({
+          url: URL,
+        });
       }
-
-      main.style.display = "none";
     }
   );
 };
