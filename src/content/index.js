@@ -28,7 +28,7 @@ const checkMissionBoard = (query, interval) => {
 
 chrome.runtime.onMessage.addListener((req, _, sendResponse) => {
   if (req.action === 'start') {
-    checkMissionBoard(req.query, req.interval * 1000);
+    checkMissionBoard(req.query, req.interval);
     sendResponse({ success: true });
   }
 

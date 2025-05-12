@@ -9,11 +9,13 @@ const state = {
   query: '',
 };
 
-const setState = values => {
+const setState = async values => {
   for (const [key, value] of Object.entries(values)) {
     state[key] = value;
-    chrome.storage.local.set({ [key]: value });
+    await chrome.storage.local.set({ [key]: value });
   }
+
+  return Promise.resolve();
 };
 
 const handleNotifications = async () => {
@@ -37,6 +39,8 @@ const handleNotifications = async () => {
       message: 'Found a mission for you!',
     });
   }
+
+  return Promise.resolve();
 };
 
 const sendContentMessage = async message => {
@@ -48,13 +52,12 @@ const sendContentMessage = async message => {
   return chrome.tabs.sendMessage(tab.id, message);
 };
 
-const setIcon = icon => {
-  chrome.action.setIcon({ path: icon });
-};
+const updateIcon = async active =>
+  chrome.action.setIcon({ path: active ? ICON_ACTIVE : ICON });
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.clear();
-  setState({
+chrome.runtime.onInstalled.addListener(async () => {
+  await chrome.storage.local.clear();
+  await setState({
     isRunning: false,
     notificationChrome: true,
     notificationSound: true,
@@ -72,17 +75,15 @@ chrome.runtime.onMessage.addListener(async req => {
       });
 
       if (res.success) {
-        setState({
+        await setState({
           isRunning: true,
           query: req.query,
           notificationChrome: req.notificationChrome,
           notificationSound: req.notificationSound,
         });
-
-        setIcon(ICON_ACTIVE);
       }
 
-      return;
+      return Promise.resolve();
     }
 
     const res = await sendContentMessage({
@@ -90,14 +91,22 @@ chrome.runtime.onMessage.addListener(async req => {
     });
 
     if (res.success) {
-      setState({ isRunning: false });
-      setIcon(ICON);
+      await setState({ isRunning: false });
+
+      return Promise.resolve();
     }
   }
 
   if (req.action === 'found') {
-    setState({ isRunning: false });
-    setIcon(ICON);
+    await setState({ isRunning: false });
     await handleNotifications();
+
+    return Promise.resolve();
+  }
+});
+
+chrome.storage.onChanged.addListener(async changes => {
+  if (changes.isRunning) {
+    await updateIcon(changes.isRunning.newValue);
   }
 });
