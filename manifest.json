@@ -3,26 +3,38 @@
   "name": "Darktide Mission Notifier",
   "version": "1.0",
   "description": "Notifies when specified mission is avaliable",
-  "permissions": ["storage", "activeTab", "scripting", "offscreen", "notifications"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "offscreen",
+    "notifications"
+  ],
   "host_permissions": ["https://darktide.gameslantern.com/mission-board"],
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "src/popup/index.html",
     "default_title": "Darktide Mission Notifier"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background/index.js"
   },
   "content_scripts": [
     {
       "matches": ["https://darktide.gameslantern.com/mission-board"],
-      "js": ["content.js"],
+      "js": ["src/content/index.js"],
       "run_at": "document_end"
     }
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/offscreen/index.html"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "icons": {
-    "16": "icon.png",
-    "32": "icon.png",
-    "48": "icon.png",
-    "128": "icon.png"
+    "16": "src/assets/icon.png",
+    "32": "src/assets/icon.png",
+    "48": "src/assets/icon.png",
+    "128": "src/assets/icon.png"
   }
 }

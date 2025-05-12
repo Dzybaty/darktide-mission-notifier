@@ -1,6 +1,6 @@
 const UPDATE_INTERVAL = 60000;
-const ICON = 'icon.png';
-const ICON_ACTIVE = 'icon_active.png';
+const ICON = '../assets/icon.png';
+const ICON_ACTIVE = '../assets/icon_active.png';
 
 const state = {
   isRunning: false,
@@ -18,8 +18,10 @@ const setState = values => {
 
 const handleNotifications = async () => {
   if (state.notificationSound) {
+    const offscreenUrl = chrome.runtime.getURL('src/offscreen/index.html');
+
     await chrome.offscreen.createDocument({
-      url: 'audio.html',
+      url: offscreenUrl,
       reasons: [chrome.offscreen.Reason.AUDIO_PLAYBACK],
       justification: 'notification',
     });
@@ -30,7 +32,7 @@ const handleNotifications = async () => {
   if (state.notificationChrome) {
     chrome.notifications.create({
       type: 'basic',
-      iconUrl: 'icon.png',
+      iconUrl: ICON,
       title: 'Darktide Mission Notifier',
       message: 'Found a mission for you!',
     });
