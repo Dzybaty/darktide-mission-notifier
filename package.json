@@ -1,0 +1,16 @@
+{
+  "name": "darktide-mission-notifier",
+  "version": "1.0.0",
+  "main": "background.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@eslint/js": "9.26.0",
+    "@stylistic/eslint-plugin-js": "^4.2.0",
+    "eslint": "9.26.0",
+    "globals": "16.1.0",
+    "prettier": "3.5.3"
+  }
+}

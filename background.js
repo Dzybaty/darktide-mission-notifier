@@ -1,15 +1,15 @@
 const UPDATE_INTERVAL = 60000;
-const ICON = "icon.png";
-const ICON_ACTIVE = "icon_active.png";
+const ICON = 'icon.png';
+const ICON_ACTIVE = 'icon_active.png';
 
 const state = {
   isRunning: false,
   notificationChrome: true,
   notificationSound: true,
-  query: "",
+  query: '',
 };
 
-const setState = (values) => {
+const setState = values => {
   for (const [key, value] of Object.entries(values)) {
     state[key] = value;
     chrome.storage.local.set({ [key]: value });
@@ -19,9 +19,9 @@ const setState = (values) => {
 const handleNotifications = async () => {
   if (state.notificationSound) {
     await chrome.offscreen.createDocument({
-      url: "audio.html",
+      url: 'audio.html',
       reasons: [chrome.offscreen.Reason.AUDIO_PLAYBACK],
-      justification: "notification",
+      justification: 'notification',
     });
 
     setTimeout(() => chrome.offscreen.closeDocument(), 2000);
@@ -29,15 +29,15 @@ const handleNotifications = async () => {
 
   if (state.notificationChrome) {
     chrome.notifications.create({
-      type: "basic",
-      iconUrl: "icon.png",
-      title: "Darktide Mission Notifier",
-      message: "Found a mission for you!",
+      type: 'basic',
+      iconUrl: 'icon.png',
+      title: 'Darktide Mission Notifier',
+      message: 'Found a mission for you!',
     });
   }
 };
 
-const sendContentMessage = async (message) => {
+const sendContentMessage = async message => {
   const [tab] = await chrome.tabs.query({
     active: true,
     lastFocusedWindow: true,
@@ -46,7 +46,7 @@ const sendContentMessage = async (message) => {
   return chrome.tabs.sendMessage(tab.id, message);
 };
 
-const setIcon = (icon) => {
+const setIcon = icon => {
   chrome.action.setIcon({ path: icon });
 };
 
@@ -56,15 +56,15 @@ chrome.runtime.onInstalled.addListener(() => {
     isRunning: false,
     notificationChrome: true,
     notificationSound: true,
-    query: "",
+    query: '',
   });
 });
 
-chrome.runtime.onMessage.addListener(async (req) => {
-  if (req.action === "click") {
+chrome.runtime.onMessage.addListener(async req => {
+  if (req.action === 'click') {
     if (!state.isRunning) {
       const res = await sendContentMessage({
-        action: "start",
+        action: 'start',
         query: req.query,
         interval: UPDATE_INTERVAL,
       });
@@ -84,7 +84,7 @@ chrome.runtime.onMessage.addListener(async (req) => {
     }
 
     const res = await sendContentMessage({
-      action: "stop",
+      action: 'stop',
     });
 
     if (res.success) {
@@ -93,7 +93,7 @@ chrome.runtime.onMessage.addListener(async (req) => {
     }
   }
 
-  if (req.action === "found") {
+  if (req.action === 'found') {
     setState({ isRunning: false });
     setIcon(ICON);
     await handleNotifications();
