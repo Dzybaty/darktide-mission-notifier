@@ -9,6 +9,7 @@ export default defineConfig([
     plugins: { js, '@stylistic/js': stylisticJs },
     rules: {
       'no-console': 'error',
+      'no-unused-vars': 'error',
       '@stylistic/js/indent': ['error', 2],
       '@stylistic/js/semi': ['error', 'always'],
       '@stylistic/js/quotes': ['error', 'single'],
