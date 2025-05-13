@@ -9,6 +9,17 @@ const state = {
   query: '',
 };
 
+const init = async () => {
+  await chrome.storage.local.clear();
+
+  await setState({
+    isRunning: false,
+    notificationChrome: true,
+    notificationSound: true,
+    query: '',
+  });
+};
+
 const setState = async values => {
   for (const [key, value] of Object.entries(values)) {
     state[key] = value;
@@ -55,16 +66,6 @@ const sendContentMessage = async message => {
 const updateIcon = async active =>
   chrome.action.setIcon({ path: active ? ICON_ACTIVE : ICON });
 
-chrome.runtime.onInstalled.addListener(async () => {
-  await chrome.storage.local.clear();
-  await setState({
-    isRunning: false,
-    notificationChrome: true,
-    notificationSound: true,
-    query: '',
-  });
-});
-
 chrome.runtime.onMessage.addListener(async req => {
   if (req.action === 'click') {
     if (!state.isRunning) {
@@ -109,4 +110,12 @@ chrome.storage.onChanged.addListener(async changes => {
   if (changes.isRunning) {
     await updateIcon(changes.isRunning.newValue);
   }
+});
+
+chrome.runtime.onStartup.addListener(async () => {
+  await init();
+});
+
+chrome.runtime.onInstalled.addListener(async () => {
+  await init();
 });
