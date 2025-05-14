@@ -1,6 +1,7 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
   entry: {
@@ -17,7 +18,6 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
           options: {
@@ -44,7 +44,7 @@ module.exports = {
         {
           from: 'src/assets',
           to: 'assets',
-          filter: (resourcePath) => {
+          filter: resourcePath => {
             return !/\.js$/.test(resourcePath);
           },
         },
@@ -67,5 +67,11 @@ module.exports = {
     splitChunks: {
       chunks: 'all',
     },
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        extractComments: false,
+      }),
+    ],
   },
 };

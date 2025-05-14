@@ -1,36 +1,33 @@
-const UPDATE_INTERVAL = 60000;
-const ICON = 'assets/icon.png';
-const ICON_ACTIVE = 'assets/icon_active.png';
+import { ACTIONS, UPDATE_INTERVAL, ICON, ICON_ACTIVE } from '../constants';
 
-const state = {
+const defaultState = {
   isRunning: false,
-  notificationChrome: true,
-  notificationSound: true,
-  query: '',
+  mission: {
+    name: 'Any',
+    type: 'Any',
+    threat: 'Any',
+    condition: 'Any',
+    books: 'Any',
+  },
+  notifications: {
+    chrome: true,
+    sound: true,
+  },
+};
+
+const setState = async newValues => {
+  await chrome.storage.local.set(newValues);
 };
 
 const init = async () => {
   await chrome.storage.local.clear();
-
-  await setState({
-    isRunning: false,
-    notificationChrome: true,
-    notificationSound: true,
-    query: '',
-  });
-};
-
-const setState = async values => {
-  for (const [key, value] of Object.entries(values)) {
-    state[key] = value;
-    await chrome.storage.local.set({ [key]: value });
-  }
-
-  return Promise.resolve();
+  await setState(defaultState);
 };
 
 const handleNotifications = async () => {
-  if (state.notificationSound) {
+  const { notifications } = await chrome.storage.local.get();
+
+  if (notifications.sound) {
     const offscreenUrl = chrome.runtime.getURL('offscreen.html');
 
     await chrome.offscreen.createDocument({
@@ -42,7 +39,7 @@ const handleNotifications = async () => {
     setTimeout(() => chrome.offscreen.closeDocument(), 2000);
   }
 
-  if (state.notificationChrome) {
+  if (notifications.chrome) {
     chrome.notifications.create({
       type: 'basic',
       iconUrl: ICON,
@@ -67,20 +64,21 @@ const updateIcon = async active =>
   chrome.action.setIcon({ path: active ? ICON_ACTIVE : ICON });
 
 chrome.runtime.onMessage.addListener(async req => {
-  if (req.action === 'click') {
-    if (!state.isRunning) {
+  const { isRunning } = await chrome.storage.local.get();
+
+  if (req.action === ACTIONS.CLICK) {
+    if (!isRunning) {
       const res = await sendContentMessage({
-        action: 'start',
-        query: req.query,
+        action: ACTIONS.START,
+        mission: req.mission,
         interval: UPDATE_INTERVAL,
       });
 
       if (res.success) {
         await setState({
           isRunning: true,
-          query: req.query,
-          notificationChrome: req.notificationChrome,
-          notificationSound: req.notificationSound,
+          mission: req.mission,
+          notifications: req.notifications,
         });
       }
 
@@ -88,7 +86,7 @@ chrome.runtime.onMessage.addListener(async req => {
     }
 
     const res = await sendContentMessage({
-      action: 'stop',
+      action: ACTIONS.STOP,
     });
 
     if (res.success) {
@@ -98,8 +96,12 @@ chrome.runtime.onMessage.addListener(async req => {
     }
   }
 
-  if (req.action === 'found') {
-    await setState({ isRunning: false });
+  if (req.action === ACTIONS.FOUND) {
+    await setState({
+      isRunning: false,
+      mission: defaultState.mission,
+    });
+
     await handleNotifications();
 
     return Promise.resolve();

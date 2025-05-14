@@ -1,17 +1,40 @@
+import { ACTIONS } from '../constants';
+import { MAP_MISSION_TREAT } from '../constants/mission';
+
 let timeout = null;
 
 const handleFound = async () => {
-  await chrome.runtime.sendMessage({ action: 'found' });
+  await chrome.runtime.sendMessage({ action: ACTIONS.FOUND });
 };
 
-const checkMissionBoard = (query, interval) => {
+const generateSearchParameters = mission => {
+  const mappedParams = Object.keys(mission).map(key => {
+    if (mission[key] === 'Any') {
+      return null;
+    }
+
+    if (key === 'threat') {
+      return MAP_MISSION_TREAT[mission[key]];
+    }
+
+    return mission[key];
+  });
+
+  return mappedParams.filter(param => !!param);
+};
+
+const matchesSearchParams = (data, params) => params.every(param => data.includes(param));
+
+const checkMissionBoard = (mission, interval) => {
   let found = false;
+
+  const searchParams = generateSearchParameters(mission);
 
   const container = document.querySelector('div#darktide-mission-board')
     .children[1];
 
   for (const mission of container.children) {
-    if (mission.innerHTML.toLowerCase().includes(query.toLowerCase())) {
+    if (matchesSearchParams(mission.innerHTML, searchParams)) {
       found = true;
       mission.style.border = '2px solid red';
     }
@@ -27,12 +50,12 @@ const checkMissionBoard = (query, interval) => {
 };
 
 chrome.runtime.onMessage.addListener((req, _, sendResponse) => {
-  if (req.action === 'start') {
-    checkMissionBoard(req.query, req.interval);
+  if (req.action === ACTIONS.START) {
+    checkMissionBoard(req.mission, req.interval);
     sendResponse({ success: true });
   }
 
-  if (req.action === 'stop') {
+  if (req.action === ACTIONS.STOP) {
     if (timeout) {
       clearTimeout(timeout);
     }

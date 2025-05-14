@@ -1,8 +1,24 @@
-const checkTab = () => {
-  const URL = 'https://darktide.gameslantern.com/mission-board';
+import { ACTIONS, BOARD_URL } from '../constants';
+import {
+  MISSION_NAMES,
+  MISSION_TYPES,
+  MISSION_THREATS,
+  MISSION_CONDITIONS,
+  MISSION_BOOKS,
+} from '../constants/mission';
 
+import {
+  updateButtonText,
+  updateFieldValue,
+  updateCheckboxValue,
+  toggleShowMessage,
+  generateOptions,
+  toggleFields,
+} from '../utils/form';
+
+const checkTab = () => {
   chrome.tabs.query({}, tabs => {
-    const tab = tabs?.find(el => el.url === URL);
+    const tab = tabs?.find(el => el.url === BOARD_URL);
 
     if (tab) {
       if (tab.active) {
@@ -14,82 +30,75 @@ const checkTab = () => {
       return;
     }
 
-    chrome.tabs.create({ url: URL });
+    chrome.tabs.create({ url: BOARD_URL });
   });
-};
-
-const updateButton = (button, isRunning) => {
-  button.textContent = isRunning ? 'STOP' : 'START';
-};
-
-const updateField = (field, key, value) => {
-  field[key] = value;
-};
-
-const toggleShowMessage = (element, isShown) => {
-  if (isShown) {
-    element.style.display = 'block';
-
-    return;
-  }
-
-  element.style.display = 'none';
-};
-
-const toggleDisableElements = (elements, value) => {
-  for (const element of elements) {
-    element.disabled = value;
-  }
-};
-
-const validate = (query, error) => {
-  if (!query.value) {
-    toggleShowMessage(error, true);
-
-    return false;
-  }
-
-  toggleShowMessage(error, false);
-
-  return true;
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
   checkTab();
-  const error = document.getElementById('error');
+
+  const name = document.getElementById('mission-name');
+  const type = document.getElementById('mission-type');
+  const threat = document.getElementById('mission-threat');
+  const condition = document.getElementById('mission-condition');
+  const books = document.getElementById('mission-books');
+
   const status = document.getElementById('status');
-  const query = document.getElementById('query');
   const notificationChrome = document.getElementById('notification-chrome');
   const notificationSound = document.getElementById('notification-sound');
   const button = document.getElementById('button');
 
-  const {
-    isRunning,
-    query: queryValue,
-    notificationChrome: notificationChromeValue,
-    notificationSound: notificationSoundValue,
-  } = await chrome.storage.local.get();
+  const SELECTABLE_FIELDS = {
+    name,
+    type,
+    threat,
+    condition,
+    books,
+  };
 
-  updateButton(button, isRunning);
-  updateField(query, 'value', queryValue);
-  updateField(notificationChrome, 'checked', notificationChromeValue);
-  updateField(notificationSoundValue, 'checked', notificationSoundValue);
+  const OPTIONS_FIELDS = {
+    notificationChrome,
+    notificationSound,
+  };
+
+  generateOptions(name, MISSION_NAMES);
+  generateOptions(type, MISSION_TYPES);
+  generateOptions(threat, MISSION_THREATS);
+  generateOptions(condition, MISSION_CONDITIONS);
+  generateOptions(books, MISSION_BOOKS);
+
+  const { isRunning, mission, notifications } =
+    await chrome.storage.local.get();
+
+  updateButtonText(button, isRunning);
+
+  updateFieldValue(name, mission.name);
+  updateFieldValue(type, mission.type);
+  updateFieldValue(threat, mission.threat);
+  updateFieldValue(condition, mission.condition);
+  updateFieldValue(books, mission.books);
+
+  updateCheckboxValue(notificationChrome, notifications.chrome);
+  updateCheckboxValue(notificationSound, notifications.sound);
+
   toggleShowMessage(status, isRunning);
-  toggleDisableElements(
-    [notificationChrome, notificationSound, query],
-    isRunning,
-  );
+  toggleFields(SELECTABLE_FIELDS, isRunning);
+  toggleFields(OPTIONS_FIELDS, isRunning);
 
   const handleClick = async () => {
-    if (!isRunning && !validate(query, error)) {
-      return;
-    }
-
     await chrome.runtime.sendMessage({
-      action: 'click',
-      query: query.value,
-      notificationChrome: notificationChrome.checked,
-      notificationSound: notificationSound.checked,
+      action: ACTIONS.CLICK,
+      mission: {
+        name: name.value,
+        type: type.value,
+        threat: threat.value,
+        condition: condition.value,
+        books: books.value,
+      },
+      notifications: {
+        chrome: notificationChrome.checked,
+        sound: notificationSound.checked,
+      },
     });
   };
 
@@ -97,31 +106,43 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   chrome.storage.onChanged.addListener(changes => {
     if (changes.isRunning) {
-      updateButton(button, changes.isRunning.newValue);
+      updateButtonText(button, changes.isRunning.newValue);
       toggleShowMessage(status, changes.isRunning.newValue);
-      toggleDisableElements(
-        [notificationChrome, notificationSound, query],
-        changes.isRunning.newValue,
-      );
+      toggleFields(SELECTABLE_FIELDS, changes.isRunning.newValue);
+      toggleFields(OPTIONS_FIELDS, changes.isRunning.newValue);
     }
 
-    if (changes.query) {
-      updateField(query, 'value', changes.query.newValue);
+    if (changes.mission?.name) {
+      updateFieldValue(name, changes.mission.name.newValue);
     }
 
-    if (changes.notificationChrome) {
-      updateField(
+    if (changes.mission?.type) {
+      updateFieldValue(type, changes.mission.type.newValue);
+    }
+
+    if (changes.mission?.threat) {
+      updateFieldValue(threat, changes.mission.threat.newValue);
+    }
+
+    if (changes.mission?.condition) {
+      updateFieldValue(condition, changes.mission.condition.newValue);
+    }
+
+    if (changes.mission?.books) {
+      updateFieldValue(books, changes.mission.books.newValue);
+    }
+
+    if (changes.notifications?.chrome) {
+      updateCheckboxValue(
         notificationChrome,
-        'checked',
-        changes.notificationChrome.newValue,
+        changes.notifications.chrome.newValue,
       );
     }
 
-    if (changes.notificationSound) {
-      updateField(
+    if (changes.notifications?.sound) {
+      updateCheckboxValue(
         notificationSound,
-        'checked',
-        changes.notificationSound.newValue,
+        changes.notifications.sound.newValue,
       );
     }
   });

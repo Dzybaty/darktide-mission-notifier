@@ -10,6 +10,12 @@ body {
   gap: 6px;
   width: 180px;
 
+  #search-parameters {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
   #options {
     display: flex;
     flex-direction: column;
