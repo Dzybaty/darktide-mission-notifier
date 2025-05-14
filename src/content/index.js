@@ -17,13 +17,19 @@ const generateSearchParameters = mission => {
       return MAP_MISSION_TREAT[mission[key]];
     }
 
+    // Custom case because every element has this text
+    if (key === 'books' && mission[key] === 'Grimoires') {
+      return 'grimoire.png';
+    }
+
     return mission[key];
   });
 
   return mappedParams.filter(param => !!param);
 };
 
-const matchesSearchParams = (data, params) => params.every(param => data.includes(param));
+const matchesSearchParams = (data, params) =>
+  params.every(param => data.includes(param));
 
 const checkMissionBoard = (mission, interval) => {
   let found = false;
