@@ -46,7 +46,7 @@ const checkMissionBoard = (mission, interval) => {
     return;
   }
 
-  timeout = setTimeout(() => checkMissionBoard(query, interval), interval);
+  timeout = setTimeout(() => checkMissionBoard(mission, interval), interval);
 };
 
 chrome.runtime.onMessage.addListener((req, _, sendResponse) => {
