@@ -12,29 +12,29 @@
   ],
   "host_permissions": ["https://darktide.gameslantern.com/mission-board"],
   "action": {
-    "default_popup": "src/popup/index.html",
+    "default_popup": "popup.html",
     "default_title": "Darktide Mission Notifier"
   },
   "background": {
-    "service_worker": "src/background/index.js"
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": ["https://darktide.gameslantern.com/mission-board"],
-      "js": ["src/content/index.js"],
+      "js": ["content.js"],
       "run_at": "document_end"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["src/offscreen/index.html"],
+      "resources": ["offscreen.html"],
       "matches": ["<all_urls>"]
     }
   ],
   "icons": {
-    "16": "src/assets/icon.png",
-    "32": "src/assets/icon.png",
-    "48": "src/assets/icon.png",
-    "128": "src/assets/icon.png"
+    "16": "assets/icon.png",
+    "32": "assets/icon.png",
+    "48": "assets/icon.png",
+    "128": "assets/icon.png"
   }
 }

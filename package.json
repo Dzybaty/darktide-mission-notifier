@@ -6,11 +6,23 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "scripts": {
+    "build": "webpack --mode production"
+  },
   "devDependencies": {
+    "@babel/core": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
     "@eslint/js": "9.26.0",
     "@stylistic/eslint-plugin-js": "^4.2.0",
+    "babel-loader": "^10.0.0",
+    "copy-webpack-plugin": "^13.0.0",
+    "css-loader": "^7.1.2",
     "eslint": "9.26.0",
     "globals": "16.1.0",
-    "prettier": "3.5.3"
+    "html-webpack-plugin": "^5.6.3",
+    "prettier": "3.5.3",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.99.8",
+    "webpack-cli": "^6.0.1"
   }
 }

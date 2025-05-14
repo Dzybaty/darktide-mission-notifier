@@ -1,6 +1,6 @@
 const UPDATE_INTERVAL = 60000;
-const ICON = '../assets/icon.png';
-const ICON_ACTIVE = '../assets/icon_active.png';
+const ICON = 'assets/icon.png';
+const ICON_ACTIVE = 'assets/icon_active.png';
 
 const state = {
   isRunning: false,
@@ -31,7 +31,7 @@ const setState = async values => {
 
 const handleNotifications = async () => {
   if (state.notificationSound) {
-    const offscreenUrl = chrome.runtime.getURL('src/offscreen/index.html');
+    const offscreenUrl = chrome.runtime.getURL('offscreen.html');
 
     await chrome.offscreen.createDocument({
       url: offscreenUrl,
