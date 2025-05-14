@@ -54,13 +54,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   chrome.storage.onChanged.addListener(changes => {
     if (changes.isRunning) {
-      setButtonText(form.button, changes.isRunning.newValue);
-      toggleShowStatus(form.status, changes.isRunning.newValue);
-      toggleFields(
-        changes.isRunning.newValue,
-        form.mission,
-        form.notifications,
-      );
+      const { newValue } = changes.isRunning;
+
+      setButtonText(form.button, newValue);
+      toggleShowStatus(form.status, newValue);
+      toggleFields(newValue, form.mission, form.notifications);
     }
 
     if (changes.mission) {

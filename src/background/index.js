@@ -47,8 +47,6 @@ const handleNotifications = async () => {
       message: 'Found a mission for you!',
     });
   }
-
-  return Promise.resolve();
 };
 
 const sendContentMessage = async message => {
@@ -81,8 +79,6 @@ chrome.runtime.onMessage.addListener(async req => {
           notifications: req.notifications,
         });
       }
-
-      return Promise.resolve();
     }
 
     const res = await sendContentMessage({
@@ -91,8 +87,6 @@ chrome.runtime.onMessage.addListener(async req => {
 
     if (res.success) {
       await setState({ isRunning: false });
-
-      return Promise.resolve();
     }
   }
 
@@ -103,8 +97,6 @@ chrome.runtime.onMessage.addListener(async req => {
     });
 
     await handleNotifications();
-
-    return Promise.resolve();
   }
 });
 

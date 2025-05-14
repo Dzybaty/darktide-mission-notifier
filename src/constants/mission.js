@@ -42,11 +42,8 @@ export const MISSION_THREATS = [
   'Malice',
   'Uprising',
   'Sedition',
-  // '[Auric] Damnation',
-  // '[Auric] Heresy',
-  // '[Auric] Malice',
-  // '[Auric] Uprising',
-  // '[Auric] Sedition',
+  '[AURIC] Damnation',
+  '[AURIC] Heresy',
 ];
 
 export const MISSION_CONDITIONS = [
@@ -82,6 +79,8 @@ export const MISSION_BOOKS = [
 
 export const MAP_MISSION_TREAT = {
   'Any': 'Any',
+  '[AURIC] Damnation': 'threat_5',
+  '[AURIC] Heresy': 'threat_4',
   'Damnation': 'threat_5',
   'Heresy': 'threat_4',
   'Malice': 'threat_3',

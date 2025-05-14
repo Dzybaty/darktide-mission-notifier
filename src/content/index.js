@@ -8,12 +8,15 @@ const handleFound = async () => {
 };
 
 const generateSearchParameters = mission => {
+  let shouldIncludeAuric = false;
   const mappedParams = Object.keys(mission).map(key => {
     if (mission[key] === 'Any') {
       return null;
     }
 
     if (key === 'threat') {
+      shouldIncludeAuric = mission[key].includes('[AURIC]');
+
       return MAP_MISSION_TREAT[mission[key]];
     }
 
@@ -24,6 +27,10 @@ const generateSearchParameters = mission => {
 
     return mission[key];
   });
+
+  if (shouldIncludeAuric) {
+    mappedParams.push('auric');
+  }
 
   return mappedParams.filter(param => !!param);
 };
