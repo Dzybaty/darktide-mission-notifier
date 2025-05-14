@@ -1,20 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <title>Darktide Mission Notifier</title>
     <script src="index.js"></script>
-    <link rel="stylesheet" href="../styles/index.css" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div id="main">
-      <label for="query">Search for text:</label>
-      <input
-        type="text"
-        id="query"
-        placeholder="Search for text"
-        autocomplete="off"
-        required
-      />
+      <div id="search-parameters">
+        <label for="mission-name">Mission:</label>
+        <select id="mission-name"></select>
+        <label for="mission-type">Objective:</label>
+        <select id="mission-type"></select>
+        <label for="mission-threat">Threat:</label>
+        <select id="mission-threat"></select>
+        <label for="mission-condition">Condition:</label>
+        <select id="mission-condition"></select>
+        <label for="mission-books">Books:</label>
+        <select id="mission-books"></select>
+      </div>
       <div id="options">
         <div>
           <label for="notification-chrome">Chrome notification:</label>

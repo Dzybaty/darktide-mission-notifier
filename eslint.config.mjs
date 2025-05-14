@@ -5,7 +5,7 @@ import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
   {
-    files: ['**/*.{js,mjs,cjs}'],
+    files: ['src/**/*.{js,mjs,cjs}'],
     plugins: { js, '@stylistic/js': stylisticJs },
     rules: {
       'no-console': 'error',
@@ -26,11 +26,11 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/*.js'],
+    files: ['src/**/*.js'],
     languageOptions: { ecmaVersion: 'latest', sourceType: 'module' },
   },
   {
-    files: ['**/*.{js,mjs,cjs}'],
+    files: ['src/**/*.{js,mjs,cjs}'],
     languageOptions: {
       globals: { chrome: 'readonly', ...globals.browser },
     },

@@ -1,128 +1,81 @@
-const checkTab = () => {
-  const URL = 'https://darktide.gameslantern.com/mission-board';
+import { ACTIONS } from '../constants';
+import { redirectToTab } from '../utils/redirect';
 
-  chrome.tabs.query({}, tabs => {
-    const tab = tabs?.find(el => el.url === URL);
-
-    if (tab) {
-      if (tab.active) {
-        return;
-      }
-
-      chrome.tabs.update(tab.id, { active: true });
-
-      return;
-    }
-
-    chrome.tabs.create({ url: URL });
-  });
-};
-
-const updateButton = (button, isRunning) => {
-  button.textContent = isRunning ? 'STOP' : 'START';
-};
-
-const updateField = (field, key, value) => {
-  field[key] = value;
-};
-
-const toggleShowMessage = (element, isShown) => {
-  if (isShown) {
-    element.style.display = 'block';
-
-    return;
-  }
-
-  element.style.display = 'none';
-};
-
-const toggleDisableElements = (elements, value) => {
-  for (const element of elements) {
-    element.disabled = value;
-  }
-};
-
-const validate = (query, error) => {
-  if (!query.value) {
-    toggleShowMessage(error, true);
-
-    return false;
-  }
-
-  toggleShowMessage(error, false);
-
-  return true;
-};
+import {
+  setButtonText,
+  setFieldValue,
+  setCheckboxValue,
+  toggleShowStatus,
+  toggleFields,
+  initForm,
+} from '../utils/form';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  checkTab();
-  const error = document.getElementById('error');
-  const status = document.getElementById('status');
-  const query = document.getElementById('query');
-  const notificationChrome = document.getElementById('notification-chrome');
-  const notificationSound = document.getElementById('notification-sound');
-  const button = document.getElementById('button');
+  redirectToTab();
 
-  const {
-    isRunning,
-    query: queryValue,
-    notificationChrome: notificationChromeValue,
-    notificationSound: notificationSoundValue,
-  } = await chrome.storage.local.get();
+  const initialFormData = await chrome.storage.local.get();
 
-  updateButton(button, isRunning);
-  updateField(query, 'value', queryValue);
-  updateField(notificationChrome, 'checked', notificationChromeValue);
-  updateField(notificationSoundValue, 'checked', notificationSoundValue);
-  toggleShowMessage(status, isRunning);
-  toggleDisableElements(
-    [notificationChrome, notificationSound, query],
-    isRunning,
-  );
+  const form = {
+    mission: {
+      name: document.getElementById('mission-name'),
+      type: document.getElementById('mission-type'),
+      threat: document.getElementById('mission-threat'),
+      condition: document.getElementById('mission-condition'),
+      books: document.getElementById('mission-books'),
+    },
+    notifications: {
+      chrome: document.getElementById('notification-chrome'),
+      sound: document.getElementById('notification-sound'),
+    },
+    status: document.getElementById('status'),
+    button: document.getElementById('button'),
+  };
+
+  initForm(form, initialFormData);
 
   const handleClick = async () => {
-    if (!isRunning && !validate(query, error)) {
-      return;
-    }
-
     await chrome.runtime.sendMessage({
-      action: 'click',
-      query: query.value,
-      notificationChrome: notificationChrome.checked,
-      notificationSound: notificationSound.checked,
+      action: ACTIONS.CLICK,
+      mission: {
+        name: form.mission.name.value,
+        type: form.mission.type.value,
+        threat: form.mission.threat.value,
+        condition: form.mission.condition.value,
+        books: form.mission.books.value,
+      },
+      notifications: {
+        chrome: form.notifications.chrome.checked,
+        sound: form.notifications.sound.checked,
+      },
     });
   };
 
-  button.addEventListener('click', handleClick);
+  form.button.addEventListener('click', handleClick);
 
   chrome.storage.onChanged.addListener(changes => {
     if (changes.isRunning) {
-      updateButton(button, changes.isRunning.newValue);
-      toggleShowMessage(status, changes.isRunning.newValue);
-      toggleDisableElements(
-        [notificationChrome, notificationSound, query],
+      setButtonText(form.button, changes.isRunning.newValue);
+      toggleShowStatus(form.status, changes.isRunning.newValue);
+      toggleFields(
         changes.isRunning.newValue,
+        form.mission,
+        form.notifications,
       );
     }
 
-    if (changes.query) {
-      updateField(query, 'value', changes.query.newValue);
+    if (changes.mission) {
+      for (const key of Object.keys(changes.mission.newValue)) {
+        setFieldValue(form.mission[key], changes.mission.newValue[key]);
+      }
     }
 
-    if (changes.notificationChrome) {
-      updateField(
-        notificationChrome,
-        'checked',
-        changes.notificationChrome.newValue,
-      );
-    }
-
-    if (changes.notificationSound) {
-      updateField(
-        notificationSound,
-        'checked',
-        changes.notificationSound.newValue,
-      );
+    if (changes.notifications) {
+      for (const key of Object.keys(changes.notifications.newValue)) {
+        setCheckboxValue(
+          form.notifications[key],
+          changes.notifications.newValue[key],
+        );
+      }
     }
   });
 });
