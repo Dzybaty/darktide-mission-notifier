@@ -23,6 +23,14 @@ export default defineConfig([
         { blankLine: 'always', prev: 'multiline-block-like', next: '*' },
         { blankLine: 'always', prev: 'multiline-const', next: '*' },
       ],
+      '@stylistic/js/space-before-function-paren': [
+        'error',
+        {
+          anonymous: 'always',
+          named: 'never',
+          asyncArrow: 'always',
+        },
+      ],
     },
   },
   {

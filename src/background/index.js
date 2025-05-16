@@ -73,7 +73,7 @@ chrome.runtime.onMessage.addListener(async req => {
       });
 
       if (res.success) {
-        await setState({
+        return setState({
           isRunning: true,
           mission: req.mission,
           notifications: req.notifications,
